@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "cities": [
+    {
+      "name": "New York",
+      "slug": "new_york",
+      "params": ["pm25", "no2"],
+      "artifacts": {
+        "ground": [
+          "data/raw/ground/new_york_pm25.csv",
+          "data/raw/ground/new_york_no2.csv"
+        ],
+        "collocated": [
+          "data/processed/collocated_new_york_no2.parquet"
+        ],
+        "forecasts": [
+          "outputs/forecast_new_york_pm25.json",
+          "outputs/forecast_new_york_no2.json"
+        ]
+      }
+    }
+  ]
+}

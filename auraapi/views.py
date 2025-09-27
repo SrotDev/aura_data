@@ -7,10 +7,10 @@ import pandas as pd
 from django.http import JsonResponse, Http404
 from django.views.decorators.http import require_GET
 
-DATA_ROOT = Path(__file__).resolve().parents[3]  # repo root
-RAW_GROUND = DATA_ROOT / "data" / "raw" / "ground"
-PROCESSED = DATA_ROOT / "data" / "processed"
-OUTPUTS = DATA_ROOT / "outputs"
+API_ROOT = Path(__file__).resolve().parents[1]  # src/api
+RAW_GROUND = API_ROOT / "data" / "raw" / "ground"
+PROCESSED = API_ROOT / "data" / "processed"
+OUTPUTS = API_ROOT / "outputs"
 
 
 def _city_slug(name: str) -> str:
@@ -66,13 +66,21 @@ def ground_timeseries(request, city: str, param: str):
 @require_GET
 def tempo_collocated(request, city: str):
     slug = _city_slug(city)
-    path = PROCESSED / f"collocated_{slug}_no2.parquet"
-    if not path.exists():
-        raise Http404("No collocated data found")
-    try:
-        df = pd.read_parquet(path)
-    except Exception:
-        raise Http404("Unable to read collocated parquet")
+    path_parquet = PROCESSED / f"collocated_{slug}_no2.parquet"
+    path_csv = PROCESSED / f"collocated_{slug}_no2.csv"
+    df = None
+    if path_parquet.exists():
+        try:
+            df = pd.read_parquet(path_parquet)
+        except Exception:
+            df = None
+    if df is None and path_csv.exists():
+        try:
+            df = pd.read_csv(path_csv, parse_dates=["datetime_utc"])
+        except Exception:
+            df = None
+    if df is None or df.empty:
+        raise Http404("No collocated data found or unreadable")
     keep = [c for c in ["datetime_utc", "sensor_id", "ground_no2", "tempo_no2", "cloud_fraction", "qa_flag", "lat", "lon"] if c in df.columns]
     rows = df.sort_values("datetime_utc")[keep].head(5000).to_dict(orient="records")
     return JsonResponse({"city": city, "count": len(rows), "data": rows})

@@ -26,10 +26,10 @@ Base path: `/api/`
 - `src/api/aura/` — project settings/urls/wsgi
 - `src/api/auraapi/` — API app with views and routes
 
-The API reads files relative to the repo root:
-- `data/raw/ground/*.csv`
-- `data/processed/*.parquet`
-- `outputs/*.json`
+The API reads files relative to `src/api`:
+- `src/api/data/raw/ground/*.csv`
+- `src/api/data/processed/*.parquet`
+- `src/api/outputs/*.json`
 
 ## Setup and run (Windows, PowerShell)
 
